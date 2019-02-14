@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 def textureSynthesis(inputImagePath, kernelSize):
         
+    if kernelSize % 2 == 0:
+        kernelSize = kernelSize + 1
+        
     exampleMap = readImage(inputImagePath)
     imgRows, imgCols, imgChs = np.shape(exampleMap)
     
