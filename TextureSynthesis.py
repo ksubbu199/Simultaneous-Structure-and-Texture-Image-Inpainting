@@ -25,7 +25,34 @@ def textureSynthesis(inputImagePath, kernelSize):
     
     while filledPixelsCount < totalPixelsCount:
         curRow, curCol = getBestCoords(filledMap, 5)
+        
+        curPatch = getNeighbourhood(canvas, kernelSize, curRow, curCol)
 
+        curPatchMask = getNeighbourhood(filledMap, kernelSize, curRow, curCol)
+        curPatchMask = np.repeat(curPatchMask[:, :, np.newaxis], 3, axis=2)
+
+        stackCountOfPatches = np.shape(stackOfPatches)[0]
+        curPatchMask = np.repeat(curPatchMask[np.newaxis, :, :, :, ], stackCountOfPatches, axis=0)
+        curPatch = np.repeat(curPatch[np.newaxis, :, :, :, ], stackCountOfPatches, axis=0)
+
+        distances = curPatchMask * pow(stackOfPatches - curPatch, 2)
+        distances = np.sum(np.sum(np.sum(distances, axis=3), axis=2), axis=1)
+
+
+def getNeighbourhood(mapToGetNeighbourhoodFrom, kernelSize, row, col):
+    
+    halfKernel = floor(kernelSize / 2)
+    if mapToGetNeighbourhoodFrom.ndim == 3:
+        npad = ((halfKernel, halfKernel), (halfKernel, halfKernel), (0, 0))
+    elif mapToGetNeighbourhoodFrom.ndim == 2:
+        npad = ((halfKernel, halfKernel), (halfKernel, halfKernel))
+    else:
+        print('ERROR:invalid dimension!')
+        return None
+
+    paddedMap = np.lib.pad(mapToGetNeighbourhoodFrom, npad, 'constant', constant_values=0)
+    return paddedMap[row:row+2*halfKernel +1, col:col+2*halfKernel+1]
+    
 def getBestCandidateCoord(bestCandidateMap):
     size = bestCandidateMap.shape
     curRow = floor(np.argmax(bestCandidateMap) / size[1])
