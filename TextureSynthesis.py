@@ -22,7 +22,24 @@ def textureSynthesis(inputImagePath, kernelSize):
     totalPixelsCount = imgRows*imgCols
     
     gaussian = getGaussian(kernelSize, kernelSize)
+    
+    while filledPixelsCount < totalPixelsCount:
+        curRow, curCol = getBestCoords(filledMap, 5)
 
+def getBestCandidateCoord(bestCandidateMap):
+    size = bestCandidateMap.shape
+    curRow = floor(np.argmax(bestCandidateMap) / size[1])
+    curCol = np.argmax(bestCandidateMap) - curRow * size[1]
+    return curRow, curCol
+
+def getBestCoords(filledMap, kernelSize):
+    bestCandidateMap = np.zeros(filledMap.shape)
+    x,y = np.nonzero(1-filledMap)
+    for i in range(len(x)):
+        r  = x[i]
+        c = y[i]
+        bestCandidateMap[r, c] = np.sum(getNeighbourhood(filledMap, kernelSize, r, c))
+    return getBestCandidateCoord(bestCandidateMap)
 
 def readImage(inputImagePath):
     exampleMap = io.imread(inputImagePath)
