@@ -28,7 +28,7 @@ def textureSynthesis(inputImagePath, kernelSize):
         
         curPatch = getNeighbourhood(canvas, kernelSize, curRow, curCol)
 
-        curPatchMask = getNeighbourhood(filledMap, kernelSize, curRow, curCol)
+        curPatchMask = gaussian * getNeighbourhood(filledMap, kernelSize, curRow, curCol)
         curPatchMask = np.repeat(curPatchMask[:, :, np.newaxis], 3, axis=2)
 
         stackCountOfPatches = np.shape(stackOfPatches)[0]
