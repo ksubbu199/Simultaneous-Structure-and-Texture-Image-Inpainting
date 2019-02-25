@@ -9,7 +9,7 @@ import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
 
-def textureSynthesis(inputImagePath, kernelSize):
+def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation = 80, truncation = 0.8):
         
     if kernelSize % 2 == 0:
         kernelSize = kernelSize + 1
@@ -38,6 +38,17 @@ def textureSynthesis(inputImagePath, kernelSize):
         distances = curPatchMask * pow(stackOfPatches - curPatch, 2)
         distances = np.sum(np.sum(np.sum(distances, axis=3), axis=2), axis=1)
 
+        probabilities = calcProbabilitiesFromDistances(distances, truncation, attenuation)
+        sample = np.random.choice(np.arange(stackCountOfPatches), 1, p=probabilities)
+        #print(sample)
+        chosenPatch = stackOfPatches[sample]
+        halfKernel = floor(kernelSize / 2)
+        chosenPixel = np.copy(chosenPatch[0, halfKernel, halfKernel])
+
+        canvas[curRow, curCol, :] = chosenPixel
+        filledMap[curRow, curCol] = 1
+
+        filledPixelsCount = filledPixelsCount+1
 
 def getNeighbourhood(mapToGetNeighbourhoodFrom, kernelSize, row, col):
     
@@ -52,7 +63,19 @@ def getNeighbourhood(mapToGetNeighbourhoodFrom, kernelSize, row, col):
 
     paddedMap = np.lib.pad(mapToGetNeighbourhoodFrom, npad, 'constant', constant_values=0)
     return paddedMap[row:row+2*halfKernel +1, col:col+2*halfKernel+1]
+
+def calcProbabilitiesFromDistances(distances, PARM_truncation, attenuation):
     
+    probabilities = 1 - distances / np.max(distances)
+    probabilities_backup = np.array(probabilities)
+    probabilities *= (probabilities > PARM_truncation)
+    if np.max(probabilities)==0:
+        probabilities = probabilities_backup
+        probabilities *= (probabilities > PARM_truncation*np.max(probabilities))
+    probabilities = pow(probabilities, attenuation)
+    probabilities /= np.sum(probabilities)
+    return probabilities
+   
 def getBestCandidateCoord(bestCandidateMap):
     size = bestCandidateMap.shape
     curRow = floor(np.argmax(bestCandidateMap) / size[1])
