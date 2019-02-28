@@ -42,6 +42,7 @@ def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation =
         probabilities = calcProbabilitiesFromDistances(distances, truncation, attenuation)
         sample = np.random.choice(np.arange(stackCountOfPatches), 1, p=probabilities)
         #print(sample)
+        #sample = np.argmax(probabilities)
         chosenPatch = stackOfPatches[sample]
         halfKernel = floor(kernelSize / 2)
         chosenPixel = np.copy(chosenPatch[0, halfKernel, halfKernel])
