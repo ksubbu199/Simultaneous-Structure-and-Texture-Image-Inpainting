@@ -9,7 +9,7 @@ import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
 
-def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation = 80, truncation = 0.8):
+def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation = 80, truncation = 0.8, snapshots = True):
         
     if kernelSize % 2 == 0:
         kernelSize = kernelSize + 1
@@ -23,6 +23,7 @@ def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation =
     
     gaussian = getGaussian(kernelSize, kernelSize)
     
+    i = 0
     while filledPixelsCount < totalPixelsCount:
         curRow, curCol = getBestCoords(filledMap, 5)
         
@@ -49,6 +50,16 @@ def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation =
         filledMap[curRow, curCol] = 1
 
         filledPixelsCount = filledPixelsCount+1
+        i = i+1
+        if snapshots:
+            img = Image.fromarray(np.uint8(canvas*255))
+            img = img.resize((300, 300), resample=0, box=None)
+            img.save(savePath + 'out' + str(i) + '.jpg')
+    
+    if snapshots==False:
+        img = Image.fromarray(np.uint8(canvas*255))
+        img = img.resize((300, 300), resample=0, box=None)
+        img.save('out.jpg')
 
 def getNeighbourhood(mapToGetNeighbourhoodFrom, kernelSize, row, col):
     
