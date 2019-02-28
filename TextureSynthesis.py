@@ -9,7 +9,7 @@ import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
 
-def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation = 80, truncation = 0.8, snapshots = True):
+def textureSynthesis(inputImagePath, kernelSize, outputPath, backgroundThresh, attenuation = 80, truncation = 0.8, snapshots = True):
         
     if kernelSize % 2 == 0:
         kernelSize = kernelSize + 1
@@ -55,7 +55,7 @@ def textureSynthesis(inputImagePath, kernelSize, backgroundThresh, attenuation =
         if snapshots:
             img = Image.fromarray(np.uint8(canvas*255))
             img = img.resize((300, 300), resample=0, box=None)
-            img.save(savePath + 'out' + str(i) + '.jpg')
+            img.save(outputPath + 'out' + str(i) + '.jpg')
     
     if snapshots==False:
         img = Image.fromarray(np.uint8(canvas*255))
